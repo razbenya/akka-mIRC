@@ -15,10 +15,6 @@ public class UserHandler extends AbstractActor {
                 .match(LoginMessage.class, m -> {
                     ActorRef remote = getContext().actorOf(Props.create(RemoteUser.class,sender()),m.toString());
                     remote.tell(Messages.LOGINSUCC,sender());
-                })
-                .matchAny(m ->{
-                    sender().tell(m,self());
-                })
-                .build();
+                }).build();
     }
 }

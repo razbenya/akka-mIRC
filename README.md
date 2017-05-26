@@ -1,34 +1,51 @@
-## The Obligatory Hello World
-
-Since every programming paradigm needs to solve the tough problem of printing a well-known greeting to the console we’ll introduce you to the actor-based version.
-
-Open [HelloWorld.java](src/main/java/sample/hello/HelloWorld.java)
-
-The `HelloWorld` actor is the application’s “main” class; when it terminates the application will shut down—more on that later. The main business logic happens in the `preStart` method, where a `Greeter` actor is created and instructed to issue that greeting we crave for. When the greeter is done it will tell us so by sending back a message, and when that message has been received it will be passed into the behavior described by the `onReceive` method where we can conclude the demonstration by stopping the `HelloWorld` actor.
-
-## The Greeter
-
-You will be very curious to see how the `Greeter` actor performs the actual task. Open [Greeter.java](src/main/java/sample/hello/Greeter.java).
-
-This is extremely simple now: after its creation this actor will not do anything until someone sends it a message, and if that happens to be an invitation to greet the world then the `Greeter` complies and informs the requester that the deed has been done.
-
-## Main class
-
-Start the application main class `sbt "runMain Main"`. In the log output you can see the "Hello World!" greeting.
-
-[Main.java](src/main/java/sample/hello/Main.java) is actually just a small wrapper around the generic launcher class `akka.Main`, which expects only one argument: the class name of the application’s main actor. This main method will then create the infrastructure needed for running the actors, start the given main actor and arrange for the whole application to shut down once the main actor terminates.
-
-If you need more control of the startup code than what is provided by `akka.Main` you can easily write your own main class such as [Main2.java](src/main/java/sample/hello/Main2.java).
-
-Try to run the `Main2` class by `sbt "runMain Main2"`.
-
-## Run with Maven
-
-This sample also includes a Maven pom.xml.
-
-You can run the main classes with `mvn` from a terminal window using the [Exec Maven Plugin](http://mojo.codehaus.org/exec-maven-plugin/).
-
-    mvn compile exec:java -Dexec.mainClass="akka.Main" -Dexec.args="HelloWorld"
-
-    mvn compile exec:java -Dexec.mainClass="Main2"
-
+*  Complete details of the server architecture:
+    * Implemented Actors: 
+		* UserHandler - server actor that's handling login messages and creating "RemoteUser" actors. 
+		* ChannelHandler - server actor that's creating Channels.
+		* Channel - an actor that represent Channel, handles all messages that should be route to all the users in the channel
+					such as: user left, user joined, user got kicked, user got banned, disband and channel messages.
+		* RemoteUser - represents a user in the server, only used for forwarding messages to its parallel LocalUser.
+					   Required for keeping a unique name for each user, and make it easier to find a user on the server.
+		* LocalUser - the user actor handling all the messages that come from the server, channel and other users.
+					  such as: login success, private messages, channel titles, user left, join, kicked, banned etc.
+					  also handling the UI.
+					  		  
+    * Implemented Message types:
+		* BanMessage - 		Used for telling a user that he got banned from a channel.
+		* BannedMessage - 	Used by the channel to tell all its members that someone got banned.
+		* KickMessage - 	Used for telling a user that he got kicked from a channel.
+		* KickedMessage - 	Used by the channel to tell all its members that someone got kicked.
+		* JoinMessage - 	Used for telling a channel that a user wishes to join / tell the ChannelHandler that he need to create a new channel.
+		* JoinedMessage - 	Used by the channel to tell all is members that someone joined the channel.
+		* LeftMessage - 	Used by a channel to tell all its members that someone left the channel.
+		* TitleMessage - 	Used for changing a channel title.
+		* ChannelMessage - 	Used for sending a message to the channel chat.
+		* PrivateMessage - 	Used for sending a private message to a user.
+		* RequestNameMessage - Used for asking a channel for its user list (ui handling message)
+							   also used by the channel to ask members for their names.
+		* UserNameMessage - Used for sending user name to the requesting user.
+		* ChangeModeMessage - Used for promoting/demoting a user in a specific channel.
+		* LoginMessage - 	Used for login to the server (register a user name).
+		* enum Messages:
+			* LEAVE - 		Used for telling a channel that a user wishes to leave.
+			* LOGINSUCC - 	Used by the server to notify a user that his login succeeded.
+			* USERLIST - 	Used for requesting all the user names from a channel (ui handling message).
+			* CHAN - 		Used for requesting all the channel names from the ChannelHandler (ui handling message).
+			* BECOMEOWNER - used for alerting a user that he is now the owner of a channel.
+			* DISBAND - 	used for disbanding a channel.
+			
+    * Communication between Actors: 
+		* communication between users such as: Ban, Kick and Private messages flows directly between users.
+		* communication from user to channel used only when routing is needed
+		* the UserHandler used only for creating user actor for each client.
+		* the ChannelHandler is used to creating new channels if the channel doesn't exists,
+			otherwise the join message goes directly to the channel.
+		* requesting names: the UI maintains a user list for each channel and a channel list (sent when requested)
+							to do so we use a requesting name system as following: 
+							when a user wishes to retrieve the channel list he send a request to the channelHandler
+							he then passes the request (by routing) to all his routees(channels), then the channels sends their names directly
+  							to the requesting user. same mechanism work when a user wishes to retrieve a user list of a channel.
+	
+    * Routers used: 
+		* Channel - 		the channel actor is a router used for routing messages to all his users (as explained above).
+		* ChannelHandler - 	routing only for requesting channel names for ui purpose (as explained above). 
