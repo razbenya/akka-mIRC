@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * Created by RazB on 18/05/2017.
+ * Created by RazB & Neta on 18/05/2017.
  */
 
 public class LocalUser extends AbstractActor {
