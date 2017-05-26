@@ -35,12 +35,12 @@
 			* DISBAND - 	used for disbanding a channel.
 			
     * Communication between Actors: 
-		* communication between users such as: Ban, Kick and Private messages flows directly between users.
-		* communication from user to channel used only when routing is needed
-		* the UserHandler used only for creating user actor for each client.
-		* the ChannelHandler is used to creating new channels if the channel doesn't exists,
+		* Communication between users such as: Ban, Kick and Private messages flows directly between users.
+		* Communication from user to channel used only when routing is needed
+		* The UserHandler used only for creating user actor for each client.
+		* The ChannelHandler is used to creating new channels if the channel doesn't exists,
 			otherwise the join message goes directly to the channel.
-		* requesting names: the UI maintains a user list for each channel and a channel list (sent when requested)
+		* Requesting names: the UI maintains a user list for each channel and a channel list (sent when requested)
 							to do so we use a requesting name system as following: 
 							when a user wishes to retrieve the channel list he send a request to the channelHandler
 							he then passes the request (by routing) to all his routees(channels), then the channels sends their names directly
