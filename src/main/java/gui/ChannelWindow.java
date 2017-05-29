@@ -115,11 +115,12 @@ public final class ChannelWindow extends JInternalFrame  {
 
     //adding member to the list
     public void addMember(String memberName) {
-        if(!model.contains(memberName))
-            model.addElement(memberName);
-
-
-
+        if(!model.contains(memberName)){
+            SwingUtilities.invokeLater(() -> {
+                        model.addElement(memberName);
+                    }
+            );
+        }
     }
 
     //removing user from the list
